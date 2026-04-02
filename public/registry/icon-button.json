@@ -1,0 +1,13 @@
+{
+  "name": "icon-button",
+  "dependencies": [
+    "lucide-react"
+  ],
+  "registryDependencies": [],
+  "files": [
+    {
+      "name": "icon-button.tsx",
+      "content": "import * as React from \"react\"\r\nimport { ArrowRight } from \"lucide-react\"\r\nimport { cn } from \"../../lib/utils\"\r\n\r\nexport interface IconButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {}\r\n\r\nconst IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(\r\n  ({ className, children, ...props }, ref) => {\r\n    return (\r\n      <button\r\n        className={cn(\r\n          \"inline-flex items-center justify-center gap-2 rounded-md bg-black text-white px-4 py-2 text-sm font-medium hover:bg-gray-800 transition-colors\",\r\n          className\r\n        )}\r\n        ref={ref}\r\n        {...props}\r\n      >\r\n        {children}\r\n        <ArrowRight className=\"w-4 h-4\" />\r\n      </button>\r\n    )\r\n  }\r\n)\r\nIconButton.displayName = \"IconButton\"\r\n\r\nexport { IconButton }"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "name": "button",
+  "dependencies": [],
+  "registryDependencies": [],
+  "files": [
+    {
+      "name": "button.tsx",
+      "content": "import * as React from \"react\"\r\nimport { cn } from \"../../lib/utils\"\r\n\r\nexport interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {}\r\n\r\nconst Button = React.forwardRef<HTMLButtonElement, ButtonProps>(\r\n  ({ className, ...props }, ref) => {\r\n    return (\r\n      <button\r\n        // The 'cn' function merges our default styles with any custom styles the user passes in\r\n        className={cn(\r\n          \"inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none disabled:opacity-50 disabled:pointer-events-none\",\r\n          \"bg-blue-600 text-white hover:bg-blue-700 h-10 py-2 px-4\", // Default look\r\n          className // This allows the user to override the defaults!\r\n        )}\r\n        ref={ref}\r\n        {...props}\r\n      />\r\n    )\r\n  }\r\n)\r\nButton.displayName = \"Button\"\r\n\r\nexport { Button }"
+    }
+  ]
+}
