@@ -1,9 +1,9 @@
 {
   "name": "icon-button",
-  "dependencies": [
-    "lucide-react"
+  "aliases": [
+    "icon-button"
   ],
-  "registryDependencies": [],
+  "type": "components:ui",
   "files": [
     {
       "name": "icon-button.tsx",

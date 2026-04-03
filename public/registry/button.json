@@ -1,7 +1,9 @@
 {
   "name": "button",
-  "dependencies": [],
-  "registryDependencies": [],
+  "aliases": [
+    "button"
+  ],
+  "type": "components:ui",
   "files": [
     {
       "name": "button.tsx",

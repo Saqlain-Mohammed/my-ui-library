@@ -1,55 +1,62 @@
 #!/usr/bin/env node
 import fs from 'fs';
 import path from 'path';
-import { execSync } from 'child_process';
-let componentName = process.argv[2];
 
-// If the user typed "add", grab the next word instead!
-if (componentName === "add") {
-  componentName = process.argv[3];
-}
+// Read what the user types in the terminal
+const args = process.argv.slice(2);
+const command = args[0];
+const componentName = args[1];
 
-if (!componentName) {
-  console.error("❌ Please provide a component name. Example: my-ui add button");
+if (command !== 'add' || !componentName) {
+  console.error("❌ Usage: npx saqlain-ui add <component-name>");
   process.exit(1);
 }
 
-const REGISTRY_URL = `http://localhost:3000/registry/${componentName}.json`;
-const OUTPUT_DIR = './test-downloads/components/ui';
+// The URL to your new alias dictionary
+const INDEX_URL = 'https://my-ui-library-vpgx.vercel.app/registry/index.json';
+const OUTPUT_DIR = path.join(process.cwd(), 'components/ui');
 
-async function addComponent() {
+async function fetchComponent() {
   try {
-    console.log(`⏳ Fetching '${componentName}' from registry...`);
+    process.stdout.write(`🔍 Searching for '${componentName}'... `);
 
-    const response = await fetch(REGISTRY_URL);
+    // 1. Fetch the master index file first
+    const indexResponse = await fetch(INDEX_URL);
+    if (!indexResponse.ok) throw new Error("Failed to reach the registry.");
+    const masterIndex = await indexResponse.json();
+
+    // 2. Check if the component exists in our alias dictionary!
+    if (!masterIndex[componentName]) {
+      console.log(`❌ Not found.`);
+      console.log(`\nOops! '${componentName}' doesn't exist in the registry.`);
+      console.log(`👉 Available components: ${Object.keys(masterIndex).join(', ')}\n`);
+      process.exit(1);
+    }
+
+    console.log(`Found!`);
+    console.log(`⏳ Downloading '${componentName}'...`);
+
+    // 3. It exists! Fetch the exact URL from our dictionary
+    const componentInfo = masterIndex[componentName];
+    const componentResponse = await fetch(componentInfo.downloadUrl);
     
-    if (!response.ok) {
-      throw new Error(`Component '${componentName}' not found. Is your dev server running?`);
-    }
+    if (!componentResponse.ok) throw new Error("Failed to download the component data.");
+    const componentData = await componentResponse.json();
 
-    const componentData = await response.json();
-
-    // Check for and install NPM dependencies
-    if (componentData.dependencies && componentData.dependencies.length > 0) {
-      console.log(`📦 Installing dependencies: ${componentData.dependencies.join(', ')}...`);
-      execSync(`npm install ${componentData.dependencies.join(' ')} --legacy-peer-deps`, { stdio: 'inherit' });
-    }
-
+    // 4. Save it to the user's project
     if (!fs.existsSync(OUTPUT_DIR)) {
       fs.mkdirSync(OUTPUT_DIR, { recursive: true });
     }
 
-    componentData.files.forEach(file => {
-      const filePath = path.join(OUTPUT_DIR, file.name);
-      fs.writeFileSync(filePath, file.content);
-      console.log(`✅ Successfully installed ${file.name} into ${OUTPUT_DIR}/`);
-    });
+    const fileInfo = componentData.files[0];
+    const filePath = path.join(OUTPUT_DIR, fileInfo.name);
 
-    console.log(`🎉 Component '${componentName}' is ready to use!`);
+    fs.writeFileSync(filePath, fileInfo.content);
+    console.log(`✅ Successfully installed ${fileInfo.name} into ./components/ui/`);
 
   } catch (error) {
-    console.error("❌ Error:", error.message);
+    console.error(`\n❌ Error: ${error.message}\n`);
   }
 }
 
-addComponent();
+fetchComponent();

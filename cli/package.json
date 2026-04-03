@@ -1,0 +1,10 @@
+{
+  "name": "saqlain-ui",
+  "version": "1.0.0",
+  "description": "A beautifully crafted UI component library",
+  "main": "index.mjs",
+  "bin": {
+    "saqlain-ui": "./index.mjs"
+  },
+  "type": "module"
+}

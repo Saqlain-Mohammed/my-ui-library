@@ -1,52 +1,48 @@
 import fs from 'fs';
 import path from 'path';
 
-const COMPONENTS_DIR = './components/ui';
-const REGISTRY_DIR = './public/registry'; 
+const componentsDir = path.join(process.cwd(), 'components/ui');
+const registryDir = path.join(process.cwd(), 'public/registry');
 
-if (!fs.existsSync(REGISTRY_DIR)) {
-  fs.mkdirSync(REGISTRY_DIR, { recursive: true });
+if (!fs.existsSync(registryDir)) {
+  fs.mkdirSync(registryDir, { recursive: true });
 }
 
-// --- Build Regular Button ---
-const buttonCode = fs.readFileSync(path.join(COMPONENTS_DIR, 'button.tsx'), 'utf8');
+const components = fs.readdirSync(componentsDir).filter(file => file.endsWith('.tsx'));
 
-const buttonRegistry = {
-  name: "button",
-  dependencies: [], 
-  registryDependencies: [], 
-  files: [
-    {
-      name: "button.tsx",
-      content: buttonCode 
-    }
-  ]
-};
+// UPGRADE: We changed this from an Array [] to an Object {}
+// This acts as an alias dictionary for instant retrieval!
+const masterIndex = {};
 
-fs.writeFileSync(
-  path.join(REGISTRY_DIR, 'button.json'),
-  JSON.stringify(buttonRegistry, null, 2)
-);
-console.log("✅ Registry built successfully! button.json created.");
+components.forEach(file => {
+  const name = file.replace('.tsx', '');
+  const content = fs.readFileSync(path.join(componentsDir, file), 'utf8');
 
-// --- Build Icon Button ---
-const iconButtonCode = fs.readFileSync(path.join(COMPONENTS_DIR, 'icon-button.tsx'), 'utf8');
+  // 1. Build the individual component JSON
+  const componentData = {
+    name: name,
+    aliases: [name], // We can even add alternative names here later (like 'btn')
+    type: "components:ui",
+    files: [
+      {
+        name: file,
+        content: content
+      }
+    ]
+  };
+  fs.writeFileSync(path.join(registryDir, `${name}.json`), JSON.stringify(componentData, null, 2));
 
-const iconButtonRegistry = {
-  name: "icon-button",
-  dependencies: ["lucide-react"], // Tells CLI to install this package
-  registryDependencies: [], 
-  files: [
-    {
-      name: "icon-button.tsx",
-      content: iconButtonCode 
-    }
-  ]
-};
+  // 2. UPGRADE: Create the direct alias key in our master dictionary
+  masterIndex[name] = {
+    name: name,
+    type: "components:ui",
+    file: file,
+    // We can pre-build the exact live URL to make it incredibly easy for the CLI to fetch!
+    downloadUrl: `https://my-ui-library-vpgx.vercel.app/registry/${name}.json`
+  };
+});
 
-fs.writeFileSync(
-  path.join(REGISTRY_DIR, 'icon-button.json'),
-  JSON.stringify(iconButtonRegistry, null, 2)
-);
+// 3. Save the master alias dictionary as index.json
+fs.writeFileSync(path.join(registryDir, 'index.json'), JSON.stringify(masterIndex, null, 2));
 
-console.log("✅ Registry built successfully! icon-button.json created.");
+console.log(`✅ Registry built! Alias dictionary generated for ${components.length} components.`);

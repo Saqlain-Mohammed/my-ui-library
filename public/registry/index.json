@@ -1,0 +1,14 @@
+{
+  "button": {
+    "name": "button",
+    "type": "components:ui",
+    "file": "button.tsx",
+    "downloadUrl": "https://my-ui-library-vpgx.vercel.app/registry/button.json"
+  },
+  "icon-button": {
+    "name": "icon-button",
+    "type": "components:ui",
+    "file": "icon-button.tsx",
+    "downloadUrl": "https://my-ui-library-vpgx.vercel.app/registry/icon-button.json"
+  }
+}
